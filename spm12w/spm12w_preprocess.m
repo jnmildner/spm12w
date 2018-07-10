@@ -37,6 +37,10 @@ function spm12w_preprocess(varargin)
 %
 % # spm12w was developed by the Wagner, Heatherton & Kelley Labs
 % # Author: Dylan Wagner | Created: March, 2006 | Updated: March, 2017
+% # Updated by JNM on July 10, 2018: check for .ps and .pdf files before 
+%     trying to convert and copy them (starting at line 693). Only causes
+%     issues if slice timing is run alone, since that step does not create
+%     .ps output file.
 % =======1=========2=========3=========4=========5=========6=========7=========8
 
 % Parse inputs
@@ -689,12 +693,16 @@ try
 end
 
 % Convert multipage ps file to pdf using spm12w_ps2pdf.m
-spm12w_ps2pdf('ps_file',fullfile(p.datadir,'preprocess.ps'),...
-              'pdf_file',fullfile(p.datadir,[p.sid,'_',p.prep_name,'.pdf']));
+if exist(fullfile(p.datadir, 'preprocess.ps'), 'file')
+    spm12w_ps2pdf('ps_file',fullfile(p.datadir,'preprocess.ps'),...
+                  'pdf_file',fullfile(p.datadir,[p.sid,'_',p.prep_name,'.pdf']));
+end
 
 % Copy qa pdf to qa dir.
-copyfile(fullfile(p.datadir,[p.sid,'_',p.prep_name,'.pdf']), ...
-         fullfile(p.qadir,[p.sid,'_',p.prep_name,'.pdf']));
+if exist(fullfile(p.datadir, [p.sid,'_',p.prep_name,'.pdf']), 'file')
+    copyfile(fullfile(p.datadir,[p.sid,'_',p.prep_name,'.pdf']), ...
+             fullfile(p.qadir,[p.sid,'_',p.prep_name,'.pdf']));
+end
 
 % Save parameter structure to mat file
 save([p.prep_name,'.mat'],'p');
